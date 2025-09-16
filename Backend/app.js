@@ -3,9 +3,10 @@ import cors from "cors"
 
 const app = express();
 app.use(cors())
+app.use(express.urlencoded({ extended: true }))
 
-app.get("/", (req, res) => {
-  res.send("Hello world");
-});
+// routes
+import userRoute from "./routes/user.route.js"
+app.use("/users", userRoute)
 
 export { app }
