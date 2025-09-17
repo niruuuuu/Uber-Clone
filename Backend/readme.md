@@ -1,8 +1,11 @@
 # Users API
 
-This document describes the Users API endpoints implemented in the Backend of this project. Currently documented endpoint:
+This document describes the Users API endpoints implemented in the Backend of this project. Currently documented endpoints:
 
-- POST /users/register
+- POST /users/register - Create a new user account
+- POST /users/login - Authenticate and get JWT token
+- GET /users/profile - Get authenticated user's profile
+- GET /users/logout - Logout and invalidate token
 
 ---
 
@@ -114,3 +117,73 @@ Validation uses `express-validator`. If validation fails the endpoint returns a 
 
 - Passwords are compared with bcrypt using the `comparePassword` method on the User model.
 - On success a JWT token is returned which can be used for authenticated requests.
+
+---
+
+## GET /users/profile
+
+Get the authenticated user's profile information.
+
+- URL: `/users/profile`
+- Method: `GET`
+- Auth: **Required** - JWT Bearer Token
+- Content-Type: `application/json`
+
+### Authentication
+
+Include the JWT token in the request either:
+- As a Bearer token in the Authorization header: `Authorization: Bearer <token>`
+- Or as an HTTP-only cookie named `token`
+
+### Responses
+
+- 200 OK
+  - Description: Profile retrieved successfully.
+  - Body: `{ success: true, user: {...}, message: "User found successfully" }`
+  - Note: The user object excludes the password field.
+
+- 401 Unauthorized
+  - Description: Missing or invalid authentication token.
+  - Body: `{ success: false, message: "Unauthorized - No token provided" }`
+  - Body: `{ success: false, message: "Unauthorized - Invalid token" }`
+
+- 500 Internal Server Error
+  - Description: Server error while fetching profile.
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+---
+
+## GET /users/logout
+
+Logout the current user and invalidate their JWT token.
+
+- URL: `/users/logout`
+- Method: `GET`
+- Auth: **Required** - JWT Bearer Token
+- Content-Type: `application/json`
+
+### Authentication
+
+Same authentication requirements as `/users/profile`:
+- Bearer token in Authorization header
+- Or token cookie
+
+### Responses
+
+- 200 OK
+  - Description: Successfully logged out and token blacklisted.
+  - Body: `{ success: true, message: "Logged out successfully" }`
+
+- 401 Unauthorized
+  - Description: Missing or invalid authentication token.
+  - Body: `{ success: false, message: "Unauthorized - No token provided" }`
+  - Body: `{ success: false, message: "Unauthorized - Invalid token" }`
+
+- 500 Internal Server Error
+  - Description: Server error during logout.
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+### Notes
+
+- The token used for authentication is blacklisted to prevent reuse.
+- Both cookie and Authorization header tokens are handled.
