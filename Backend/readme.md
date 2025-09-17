@@ -64,3 +64,53 @@ Validation rules are enforced using `express-validator`. If validation fails, th
 ---
 
 If you want additional endpoints documented or examples for cURL/Postman, tell me which format you prefer.
+
+## POST /users/login
+
+Authenticate an existing user and return a JWT.
+
+- URL: `/users/login`
+- Method: `POST`
+- Auth: none
+- Content-Type: `application/json`
+
+### Request body
+
+The endpoint expects a JSON body with the following fields:
+
+- `email` (string) — required. Must be a valid email address.
+- `password` (string) — required. Minimum length: 6 characters.
+
+Example request JSON:
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "secret123"
+}
+```
+
+Validation uses `express-validator`. If validation fails the endpoint returns a 400 response.
+
+### Responses
+
+- 200 OK
+  - Description: Authentication successful.
+  - Body: `{ success: true, user: { _id, fullname, email }, token }`
+
+- 400 Bad Request
+  - Description: Validation error or missing fields.
+  - Body: `{ success: false, message: "Something went wrong" }` (generic) or `{ errors: [...] }` when validation details are present.
+
+- 401 Unauthorized
+  - Description: Invalid email or password.
+  - Body: `{ success: false, message: "Invalid Email or Password" }`
+
+- 500 Internal Server Error
+  - Description: Unexpected server error.
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+### Notes
+
+- Passwords are compared with bcrypt using the `comparePassword` method on the User model.
+- On success a JWT token is returned which can be used for authenticated requests.
