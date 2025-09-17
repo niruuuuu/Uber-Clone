@@ -1,11 +1,19 @@
-# Users API
+# API Documentation
 
-This document describes the Users API endpoints implemented in the Backend of this project. Currently documented endpoints:
+This document describes the API endpoints implemented in the Backend of this project.
 
+## Users API
+
+Available endpoints:
 - POST /users/register - Create a new user account
 - POST /users/login - Authenticate and get JWT token
 - GET /users/profile - Get authenticated user's profile
 - GET /users/logout - Logout and invalidate token
+
+## Captain API
+
+Available endpoints:
+- POST /captain/register - Register a new captain (driver) account
 
 ---
 
@@ -187,3 +195,201 @@ Same authentication requirements as `/users/profile`:
 
 - The token used for authentication is blacklisted to prevent reuse.
 - Both cookie and Authorization header tokens are handled.
+
+---
+
+# Captain API
+
+This section describes the API endpoints for Captain (driver) operations in the Backend.
+
+Currently documented endpoints:
+- POST /captain/register - Register a new captain account
+- GET /captain/profile - Get authenticated captain's profile
+- GET /captain/logout - Logout and invalidate captain's token
+
+## POST /captain/register
+
+Register a new captain (driver) account with vehicle details.
+
+- URL: `/captain/register`
+- Method: `POST`
+- Auth: none
+- Content-Type: `application/json`
+
+### Request body
+
+The endpoint expects a JSON body with the following fields:
+
+Personal Information:
+- `firstname` (string) — required. Minimum length: 3 characters.
+- `lastname` (string) — required. Minimum length: 3 characters.
+- `email` (string) — required. Must be a valid email address.
+- `password` (string) — required. Minimum length: 6 characters.
+
+Vehicle Information:
+- `color` (string) — required. Minimum length: 3 characters.
+- `plate` (string) — required. Vehicle plate number.
+- `capacity` (number) — required. Minimum value: 1.
+- `vehicleType` (string) — required. Must be one of: "Car", "Bike", "Auto".
+
+Example request JSON:
+```json
+{
+  "firstname": "John",
+  "lastname": "Smith",
+  "email": "john.smith@example.com",
+  "password": "secret123",
+  "color": "Silver",
+  "plate": "ABC123",
+  "capacity": 4,
+  "vehicleType": "Car"
+}
+```
+
+### Responses
+
+- 201 Created
+  - Description: Captain account successfully created.
+  - Body:
+    ```json
+    {
+      "success": true,
+      "message": "Captain created successfully",
+      "captain": {
+        "fullname": {
+          "firstname": "John",
+          "lastname": "Smith"
+        },
+        "email": "john.smith@example.com",
+        "vehicle": {
+          "color": "Silver",
+          "plate": "ABC123",
+          "capacity": 4,
+          "vehicleType": "Car"
+        },
+        "status": "Active"
+      },
+      "token": "jwt-token-string"
+    }
+    ```
+  - Note: Response includes JWT token for authentication
+
+- 400 Bad Request
+  - Description: Validation error or missing required fields
+  - Body: `{ success: false, message: "All fields are required" }` or
+  - Body: `{ success: false, errors: [...], message: "Something went wrong" }` for validation errors
+
+- 409 Conflict
+  - Description: Email already registered
+  - Body: `{ success: false, message: "This email already exists" }`
+
+- 500 Internal Server Error
+  - Description: Server error during registration
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+### Notes
+
+- The captain's status is automatically set to "Active" upon registration
+- Password is hashed using bcrypt before storage
+- Location tracking fields (latitude/longitude) are initialized as empty
+- The registration creates a JWT token valid for 24 hours
+
+---
+
+## GET /captain/profile
+
+Get the authenticated captain's profile information including vehicle details.
+
+- URL: `/captain/profile`
+- Method: `GET`
+- Auth: **Required** - JWT Bearer Token
+- Content-Type: `application/json`
+
+### Authentication
+
+Include the JWT token in the request either:
+- As a Bearer token in the Authorization header: `Authorization: Bearer <token>`
+- Or as an HTTP-only cookie named `token`
+
+### Responses
+
+- 200 OK
+  - Description: Profile retrieved successfully.
+  - Body:
+    ```json
+    {
+      "success": true,
+      "message": "Captain profile loaded successfully",
+      "captain": {
+        "_id": "captain-id",
+        "fullname": {
+          "firstname": "John",
+          "lastname": "Smith"
+        },
+        "email": "john.smith@example.com",
+        "vehicle": {
+          "color": "Silver",
+          "plate": "ABC123",
+          "capacity": 4,
+          "vehicleType": "Car"
+        },
+        "status": "Active",
+        "location": {
+          "latitude": null,
+          "longitude": null
+        }
+      }
+    }
+    ```
+
+- 401 Unauthorized
+  - Description: Missing or invalid authentication token.
+  - Body: `{ success: false, message: "Unauthorized" }`
+
+- 500 Internal Server Error
+  - Description: Server error while fetching profile.
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+### Notes
+
+- The response includes the captain's current status and location if available
+- Password field is excluded from the response
+- Token validation includes checking against the blacklist
+
+---
+
+## GET /captain/logout
+
+Logout the current captain and invalidate their JWT token.
+
+- URL: `/captain/logout`
+- Method: `GET`
+- Auth: **Required** - JWT Bearer Token
+- Content-Type: `application/json`
+
+### Authentication
+
+Same authentication requirements as `/captain/profile`:
+- Bearer token in Authorization header
+- Or token cookie
+
+### Responses
+
+- 200 OK
+  - Description: Successfully logged out and token blacklisted.
+  - Body: `{ success: true, message: "Logged out successfully" }`
+
+- 401 Unauthorized
+  - Description: Missing or invalid authentication token.
+  - Body: `{ success: false, message: "Unauthorized" }`
+
+- 500 Internal Server Error
+  - Description: Server error during logout process.
+  - Body: `{ success: false, message: "Internal Server Error" }`
+
+### Notes
+
+- Clears the token cookie if present
+- Adds the token to the blacklist to prevent reuse
+- Both cookie and Authorization header tokens are handled
+- Blacklisted tokens expire after 24 hours

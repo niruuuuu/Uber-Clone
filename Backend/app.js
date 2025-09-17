@@ -10,6 +10,9 @@ app.use(cookieParser())
 
 // routes
 import userRoute from "./routes/user.route.js"
+import captainRoute from "./routes/captain.route.js"
+
 app.use("/users", userRoute)
+app.use("/captain", captainRoute)
 
 export { app }

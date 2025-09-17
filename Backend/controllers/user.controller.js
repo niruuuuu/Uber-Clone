@@ -124,13 +124,13 @@ const login = async function (req, res, next) {
     }
 
     const token = user.generateAuthToken();
+    console.log(token)
 
     const userResponse = {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
     };
-    console.log(userResponse);
 
     return res.status(200).cookie("token", token).json({
       success: true,
