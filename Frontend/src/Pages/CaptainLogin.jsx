@@ -1,19 +1,37 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { assignCaptainData, changeLoginStatus } from "../slices/captainSlice";
+import axios from "axios";
 
 const CaptainLogin = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [captainData, setCaptainData] = useState({})
 
-  const handleSubmit = (e) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setCaptainData({
       email: email,
       password: password
     })
-    console.log(captainData)
+
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captain/login`, captainData)
+
+    if (response.status === 200) {
+      console.log(response)
+      const { captain } = response.data
+      captain.token = response.data.token
+      localStorage.setItem('token', response.data.token)
+      dispatch(assignCaptainData({ captain }))
+      dispatch(changeLoginStatus())
+      navigate('/captain/home')
+    }
+
     setEmail('')
     setPassword('')
   }

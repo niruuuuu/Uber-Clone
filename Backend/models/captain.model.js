@@ -48,7 +48,7 @@ const captainSchema = new Schema({
     capacity: {
       type: Number,
       required: true,
-      minLength: [1, "Minimum capacity is 1"]
+      min: [1, "Minimum capacity is 1"]
     },
     vehicleType: {
       type: String,

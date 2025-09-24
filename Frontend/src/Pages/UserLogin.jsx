@@ -1,19 +1,33 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { changeLoginStatus, assignUserData } from "../slices/userSlice";
+import axios from "axios";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [userData, setUserData] = useState({})
 
-  const handleSubmit = (e) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setUserData({
       email: email,
       password: password
     })
-    console.log(userData)
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
+    if (response.status === 200) {
+      const { user } = response.data
+      user.token = response.data.token
+      dispatch(assignUserData({ user }))
+      localStorage.setItem("token", response.data.token)
+      dispatch(changeLoginStatus())
+      navigate('/home')
+    }
     setEmail('')
     setPassword('')
   }

@@ -1,8 +1,9 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { assignUserData } from "../slices/userSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { assignUserData, changeLoginStatus } from "../slices/userSlice";
 import { useDispatch } from "react-redux";
+import axios from "axios"
 
 const UserSignup = () => {
   const [firstname, setFirstname] = useState("");
@@ -12,8 +13,9 @@ const UserSignup = () => {
   const [userData, setUserData] = useState({});
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setUserData({
       firstname: firstname,
@@ -22,13 +24,24 @@ const UserSignup = () => {
       password: password,
     });
 
-    dispatch(assignUserData(firstname, lastname, email))
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, userData)
+
+    if (response.status === 201) {
+      const { user } = response.data
+      user.token = response.data.token
+      dispatch(assignUserData({ user }))
+      localStorage.setItem("token", response.data.token)
+      dispatch(changeLoginStatus())
+      navigate('/home')
+    } else {
+      console.log(`Something went wrong`)
+    }
 
     setFirstname("");
     setLastname("");
     setEmail("");
     setPassword("");
-  };
+  }
 
   return (
     <div className="p-7 h-screen flex flex-col justify-between">

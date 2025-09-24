@@ -1,19 +1,62 @@
-import { Route, Routes } from "react-router-dom"
-import { Home, UserLogin, UserSignup, CaptainLogin, CaptainSignup } from "./Pages"
+import { Route, Routes } from "react-router-dom";
+import {
+  Start,
+  UserLogin,
+  UserSignup,
+  CaptainLogin,
+  CaptainSignup,
+  Home,
+  UserProtectedWrapper,
+  UserLogout,
+  CaptainHome,
+  CaptainProtectedWrapper,
+  CaptainLogout
+} from "./Pages";
 
 function App() {
-
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Start />} />
         <Route path="/login" element={<UserLogin />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/captain/signin" element={<CaptainLogin />} />
         <Route path="/captain/signup" element={<CaptainSignup />} />
+        <Route
+          path="/home"
+          element={
+            <UserProtectedWrapper>
+              <Home />
+            </UserProtectedWrapper>
+          }
+        />
+        <Route
+          path="/user/logout"
+          element={
+            <UserProtectedWrapper>
+              <UserLogout />
+            </UserProtectedWrapper>
+          }
+        />
+        <Route
+          path="/captain/home"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainHome/>
+            </CaptainProtectedWrapper>
+          }
+        />
+        <Route
+          path="/captain/logout"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainLogout/>
+            </CaptainProtectedWrapper>
+          }
+        />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
