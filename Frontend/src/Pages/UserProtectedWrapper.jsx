@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { assignUserData } from "../slices/userSlice";
 import axios from "axios";
 
-const UserProtectedWrapper = ({ children }) => {
+const UserProtectedWrapper = ({ children, childrenRoute }) => {
   const token = localStorage.getItem("token");
   const [isLoading, setIsLoading] = useState(true)
 
@@ -28,7 +28,7 @@ const UserProtectedWrapper = ({ children }) => {
         user.token = response.data.token
         dispatch(assignUserData({ user }))
         setIsLoading(false)
-        return navigate('/home')
+        return navigate(`${childrenRoute}`)
       }
     })
     .catch((error) => {
@@ -36,7 +36,7 @@ const UserProtectedWrapper = ({ children }) => {
       localStorage.removeItem('token')
       return navigate('/login')
     })
-  }, [token, navigate, dispatch]);
+  }, [token, navigate, dispatch, childrenRoute]);
 
 
   if (isLoading) {

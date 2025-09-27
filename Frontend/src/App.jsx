@@ -10,7 +10,8 @@ import {
   UserLogout,
   CaptainHome,
   CaptainProtectedWrapper,
-  CaptainLogout
+  CaptainLogout,
+  Riding
 } from "./Pages";
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
         <Route
           path="/home"
           element={
-            <UserProtectedWrapper>
+            <UserProtectedWrapper childrenRoute={`/home`}>
               <Home />
             </UserProtectedWrapper>
           }
@@ -33,7 +34,7 @@ function App() {
         <Route
           path="/user/logout"
           element={
-            <UserProtectedWrapper>
+            <UserProtectedWrapper childrenRoute={`/user/logout`}>
               <UserLogout />
             </UserProtectedWrapper>
           }
@@ -52,6 +53,14 @@ function App() {
             <CaptainProtectedWrapper>
               <CaptainLogout/>
             </CaptainProtectedWrapper>
+          }
+        />
+        <Route
+          path="/user/ride"
+          element={
+            <UserProtectedWrapper childrenRoute={`/user/ride`}>
+              <Riding />
+            </UserProtectedWrapper>
           }
         />
       </Routes>
